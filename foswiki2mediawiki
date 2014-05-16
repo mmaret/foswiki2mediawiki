@@ -1,0 +1,205 @@
+#!/usr/bin/perl
+#
+# foswiki2mediawiki converts FOSWiki sourcecode to MediaWiki
+#
+#   The MediaWiki importTextFile tool would then import the file into mediawiki
+#
+# Derived from:
+#   https://bl0rg.net/software/twiki2mediawiki/
+#
+#  2014-05-01 - ASM
+#
+#   Changed script to simply convert one file from FOSwiki to MediaWiki syntax
+#     and write the file to the same directory. 
+#
+#
+# BUGS 
+# - Leaves some HTML-markup that worked in FOSWiki hanging around
+# - Doesn't handle *fat* FOSWiki-style
+# - Doesn't handle FOSWiki-tables
+# - Doesn't handle Inter-TwikiWeb.Links correctly
+# - Doesn't handle all styles of links 
+# 
+# - Rename a lot of pages (CameLcase)
+# - Fix b0rken links (see BUGS)
+# - Fix b0rken markup (see BUGS)
+#
+#
+# TODO :
+#  - Handle attachments better
+#
+#
+
+use strict; 
+use Getopt::Std;
+
+# temp
+use Data::Dumper;
+
+
+# Options
+my %opts;
+getopts('f:d', \%opts);
+
+
+sub usage {
+  print "\n";
+  print "  Usage:   $0 [-d] -f filename \n";
+  print "\n";
+  exit;
+}
+
+
+main();
+
+sub main {
+
+  # take  filename from -f in getopts
+  (!exists $opts{f}) && usage() ;
+
+  my $foswikifile = $opts{f};
+  (!-e $foswikifile ) && die "File: $foswikifile  does not exist.\n"; 
+
+  # maybe check for .txt extension  and remove to form output filename
+
+  # for now just output to STDOUT
+
+  # file handle
+  my $fh;
+  open(my $fh, "<", "$foswikifile") or die "cannot open < $foswikifile : $!";
+
+  # INPUT
+  my $input;
+  while  (<$fh>) {
+    $input .= $_;
+  }
+
+
+  # 
+  # Show input if debug flag is set
+  #
+  if ( $opts{d} ) {
+    print "--------------------------------------------\n";
+    print "INPUT: \n";
+    print $input;
+    print "\n";
+    print "--------------------------------------------\n";
+    print "OUTPUT: \n";
+  }
+
+  my $output = convert_from_foswiki($input);
+  print $output;
+  print "\n";
+  
+  if ( $opts{d} ) {
+    print "--------------------------------------------\n";
+  }
+
+  exit;
+}
+
+
+
+
+sub convert_from_foswiki {
+  my $cur_text = shift;
+
+  # HTML comments are lame and used by Twiki for stuff
+  $cur_text =~ s#<!--.*?-->##gms;
+  
+  # Handle special fields
+  $cur_text =~ s/%META:FIELD{(.*?)}%/$1/g;
+
+  # Strip FOSWiki meta-tags
+  $cur_text =~ s/%.*?%//g;
+
+  # Convert headings
+  #  add good num of leading newlines
+  # h4-h7 get converted to h4
+  $cur_text =~ s/\n*---\+\+\++\s*(.*)/\n\n==== $1 ====/gm;
+  $cur_text =~ s/\n*---\+\+\++\s*(.*)/\n\n=== $1 ===/gm;
+  $cur_text =~ s/\n*---\+\+\s*(.*)/\n\n\n== $1 ==/gm;
+  # MediaWiki style generally does not use H1 tags, just bold it. 
+  $cur_text =~ s/\n*---\+\s*(.*)/\n\'\'\'$1\'\'\'/gm;
+
+  # Convert tabbed lists to "*"-lists
+  $cur_text =~ s/^\t\*/\*/gm;
+  $cur_text =~ s/^\t\t\*/\*\*/gm;
+  $cur_text =~ s/^\t\t\t\*/\*\*\*/gm;
+  $cur_text =~ s/^\t1/#/gm;
+  $cur_text =~ s/^\t\t1/##/gm;
+  $cur_text =~ s/^\t\t\t1/###/gm;
+
+  # Convert 3-space lists to "*"-lists
+  $cur_text =~ s/^   \*/\*/gm;
+  $cur_text =~ s/^      \*/\*\*/gm;
+  $cur_text =~ s/^         \*/\*\*\*/gm;
+  $cur_text =~ s/^   1/\#/gm;
+  $cur_text =~ s/^      1/\#\#/gm;
+  $cur_text =~ s/^         1/\#\#\#/gm;
+
+  # Convert umlauts and other funny characters to UTF8
+  $cur_text =~ s/“/"/g;
+  $cur_text =~ s/”/"/g;
+  $cur_text =~ s/„/"/g;
+  $cur_text =~ s/–/-/g;
+  $cur_text =~ s/ä/Ã¤/g;
+  $cur_text =~ s/ö/Ã¶/g;
+  $cur_text =~ s/ü/Ã¼/g;
+  $cur_text =~ s/ß/ÃŸ/g;
+  $cur_text =~ s/Ä/Ã„/g;
+  $cur_text =~ s/Ö/Ã–/g;
+  $cur_text =~ s/Ü/Ãœ/g;
+  $cur_text =~ s/’/''/g;
+
+  # Convert the funny links
+  $cur_text =~ s/\[\[(.*?)\]\[(.*?)\]\]/\[$1 $2\]/g;
+
+  # We don't need no stinking A HREF-tags
+  $cur_text =~ s#<a href="([^>]*)">([^<]*)</a>#\[$1 $2]#gi;
+  $cur_text =~ s#<a href=([^>]*)>([^<]*)</a>#\[$1 $2]#gi;
+
+  # I've got no idea what <nop> does. I'll delete it anyway.
+  $cur_text =~ s#<nop>##gi;
+  $cur_text =~ s#<k>##gi;
+ 
+  # One and two spaces at the beginning of a line has a different meaning
+  # in MediaWiki. Strip it!
+  $cur_text =~ s#^  ([^ ])#$1#gm;
+  $cur_text =~ s#^ ([^ ])#$1#gm;
+
+  # replace <pre> </pre> sections with space at beginning of line
+  # the '?' is for not-greedy matching
+  $cur_text =~ s#<pre>\n?(.*?)\n?</pre>#my $x=$1; $x=~s@^@ @gms; $x;#egms;
+
+  # Tables 
+  #
+  # FW table begin: ^|
+  # FW table end:   ^[^|]
+  # MW table begin: {| class="wikitable
+  # MW table end:   |}
+  #
+  $cur_text =~ s#^(\|.*?)^[^|]#
+      my $x = $1; 
+      $x =~ s/\|/ || /gm; 
+      $x =~ s/^ \|\|/|-\n|/gm; 
+      $x =~ s/^\|-\n[\| ]*?$//gms;
+      $x =~ s/\|\|\s*$/|/gm; 
+      $x =~ s/\| *\*(.*?)\* *\|/! $1 !/gm; 
+      $x =~ s/[!|\s]*$//gms; 
+      "{| class=\"wikitable\"\n$x\n|}\n\n" #egms;
+  #
+  # - replace single pipes with double pipes surrounded by spaces
+  # - replace space,pipe,pipe at beginning of line w/ pipe,hyphen,neline,pipe
+  # - remove empty rows 
+  # - clean up double pipes at line ends
+  # - convert bolded table cells from pipes to bangs
+  # - remove empty cells from end of line
+
+  # trim tailing newlines
+  $cur_text =~ s#\s*$#\n\n#s;
+
+  return $cur_text;
+}
+  
+
