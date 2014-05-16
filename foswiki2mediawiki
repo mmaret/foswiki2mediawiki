@@ -113,6 +113,9 @@ sub convert_from_foswiki {
   # Strip FOSWiki meta-tags
   $cur_text =~ s/%.*?%//g;
 
+  # strip ! preceding a (wiki)word
+  $cur_text =~ s/ !/ /gm;
+
   # Convert headings
   #  add good num of leading newlines
   # h4-h7 get converted to h4
