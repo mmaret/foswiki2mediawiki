@@ -16,7 +16,6 @@
 # BUGS 
 # - Leaves some HTML-markup that worked in FOSWiki hanging around
 # - Doesn't handle *fat* FOSWiki-style
-# - Doesn't handle FOSWiki-tables
 # - Doesn't handle Inter-TwikiWeb.Links correctly
 # - Doesn't handle all styles of links 
 # 
@@ -142,18 +141,18 @@ sub convert_from_foswiki {
   $cur_text =~ s/^         1/\#\#\#/gm;
 
   # Convert umlauts and other funny characters to UTF8
-  $cur_text =~ s/“/"/g;
-  $cur_text =~ s/”/"/g;
-  $cur_text =~ s/„/"/g;
-  $cur_text =~ s/–/-/g;
-  $cur_text =~ s/ä/Ã¤/g;
-  $cur_text =~ s/ö/Ã¶/g;
-  $cur_text =~ s/ü/Ã¼/g;
-  $cur_text =~ s/ß/ÃŸ/g;
-  $cur_text =~ s/Ä/Ã„/g;
-  $cur_text =~ s/Ö/Ã–/g;
-  $cur_text =~ s/Ü/Ãœ/g;
-  $cur_text =~ s/’/''/g;
+  $cur_text =~ s/ï¿½/"/g;
+  $cur_text =~ s/ï¿½/"/g;
+  $cur_text =~ s/ï¿½/"/g;
+  $cur_text =~ s/ï¿½/-/g;
+  $cur_text =~ s/ï¿½/Ã¤/g;
+  $cur_text =~ s/ï¿½/Ã¶/g;
+  $cur_text =~ s/ï¿½/Ã¼/g;
+  $cur_text =~ s/ï¿½/ÃŸ/g;
+  $cur_text =~ s/ï¿½/Ã„/g;
+  $cur_text =~ s/ï¿½/Ã–/g;
+  $cur_text =~ s/ï¿½/Ãœ/g;
+  $cur_text =~ s/ï¿½/''/g;
 
   # Convert the funny links
   $cur_text =~ s/\[\[(.*?)\]\[(.*?)\]\]/\[$1 $2\]/g;
