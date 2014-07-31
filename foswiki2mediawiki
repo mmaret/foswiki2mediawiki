@@ -105,9 +105,12 @@ sub convert_from_foswiki {
 
   # HTML comments are lame and used by Twiki for stuff
   $cur_text =~ s#<!--.*?-->##gms;
-  
+
   # Handle special fields
   $cur_text =~ s/%META:FIELD{(.*?)}%/$1/g;
+
+  # Convert Color
+  $cur_text =~ s/%([^%]*?)%([^%]*)%ENDCOLOR%/<span style="color:$1">$2<\/span>/g;
 
   # Strip FOSWiki meta-tags
   $cur_text =~ s/%.*?%//g;
@@ -173,6 +176,10 @@ sub convert_from_foswiki {
   # replace <pre> </pre> sections with space at beginning of line
   # the '?' is for not-greedy matching
   $cur_text =~ s#<pre>\n?(.*?)\n?</pre>#my $x=$1; $x=~s@^@ @gms; $x;#egms;
+
+  # replace <verbatim> </verbatim> sections with space at beginning of line
+  # the '?' is for not-greedy matching
+  $cur_text =~ s#<verbatim>\n?(.*?)\n?</verbatim>#my $x=$1; $x=~s@^@ @gms; $x;#egms;
 
   # Tables 
   #
