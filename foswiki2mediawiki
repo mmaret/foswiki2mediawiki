@@ -194,7 +194,7 @@ sub convert_from_foswiki {
 
   # replace <verbatim> </verbatim> sections with space at beginning of line
   # the '?' is for not-greedy matching
-  $cur_text =~ s#<verbatim>\n?(.*?)\n?</verbatim>#my $x=$1; $x=~s@^@ @gms; $x;#egms;
+  $cur_text =~ s#<verbatim[^\>]*>\n?(.*?)\n?</verbatim>#my $x=$1; $x=~s@^@ @gms; $x;#egms;
 
   # Tables 
   #
