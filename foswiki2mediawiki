@@ -118,6 +118,12 @@ sub convert_from_foswiki {
   # strip ! preceding a (wiki)word
   $cur_text =~ s/ !/ /gm;
 
+  #Convert fixed font
+  $cur_text =~ s/ \=([^\=\n]+)\=/ <code>$1<\/code>/gm;
+
+  # Convert bold fixed font
+  $cur_text =~ s/ \=\=([^\=\n]+)\=\=/ <code>\'\'\'$1\'\'\'<\/code>/gm;
+
   # Convert headings
   #  add good num of leading newlines
   # h4-h7 get converted to h4
@@ -142,6 +148,15 @@ sub convert_from_foswiki {
   $cur_text =~ s/^   1/\#/gm;
   $cur_text =~ s/^      1/\#\#/gm;
   $cur_text =~ s/^         1/\#\#\#/gm;
+
+  # Convert bold
+  $cur_text =~ s/\*([^ \*][^*\n]+[^  \*])\*/\'\'\'$1\'\'\'/g;
+
+  # Convert italic
+  $cur_text =~ s/ \_([^_\n]+)\_/ \'\'$1\'\'/gm;
+
+  # Convert italic and bold
+  $cur_text =~ s/ \_\_([^_\n]+)\_\_/ \'\'\'\'\'$1\'\'\'\'\'/gm;
 
   # Convert umlauts and other funny characters to UTF8
   $cur_text =~ s/�/"/g;
