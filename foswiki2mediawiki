@@ -196,6 +196,8 @@ sub convert_from_foswiki {
   # the '?' is for not-greedy matching
   $cur_text =~ s#<verbatim[^\>]*>\n?(.*?)\n?</verbatim>#my $x=$1; $x=~s@^@ @gms; $x;#egms;
 
+  # replace images
+  $cur_text =~ s/<img[^\>]*src\="\/?([^"]*)"[^\>]*>/[[File:$1]]/g;
   # Tables 
   #
   # FW table begin: ^|
