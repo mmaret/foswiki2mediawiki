@@ -145,9 +145,11 @@ sub convert_from_foswiki {
   $cur_text =~ s/^   \*/\*/gm;
   $cur_text =~ s/^      \*/\*\*/gm;
   $cur_text =~ s/^         \*/\*\*\*/gm;
+  $cur_text =~ s/^            \*/\*\*\*\*/gm;
   $cur_text =~ s/^   1/\#/gm;
   $cur_text =~ s/^      1/\#\#/gm;
   $cur_text =~ s/^         1/\#\#\#/gm;
+  $cur_text =~ s/^            1/\#\#\#\#/gm;
 
   # Convert bold
   $cur_text =~ s/\*([^ \*][^*\n]+[^  \*])\*/\'\'\'$1\'\'\'/g;
@@ -198,6 +200,9 @@ sub convert_from_foswiki {
 
   # replace images
   $cur_text =~ s/<img[^\>]*src\="\/?([^"]*)"[^\>]*>/[[File:$1]]/g;
+
+  while($cur_text =~ s/(^#[^\n]*\n)\*([^\n]*\n)/$1#$2/gm){}
+
   # Tables 
   #
   # FW table begin: ^|
