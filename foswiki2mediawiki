@@ -180,6 +180,7 @@ sub convert_from_foswiki {
   # Convert internal link to file
   $cur_text =~ s/\[\[\/(.*?)\]\[(.*?)\]\]/\[\[File:$1 \| $2\]\]/g;
   $cur_text =~ s/\[\[([^\.\/]*\.)(.*?)\]\[(.*?)\]\]/\[\[$2 \| $3\]\]/g;
+  $cur_text =~ s/\[\[(.*?)\]\[(.*?)\]\]/\[\[$1 \| $2\]\]/g;
 
   # We don't need no stinking A HREF-tags
   $cur_text =~ s#<a href="([^>]*)">([^<]*)</a>#\[$1 $2]#gi;
