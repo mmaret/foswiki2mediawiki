@@ -127,11 +127,11 @@ sub convert_from_foswiki {
   # Convert headings
   #  add good num of leading newlines
   # h4-h7 get converted to h4
-  $cur_text =~ s/\n*---\+\+\++\s*(.*)/\n\n==== $1 ====/gm;
-  $cur_text =~ s/\n*---\+\+\++\s*(.*)/\n\n=== $1 ===/gm;
-  $cur_text =~ s/\n*---\+\+\s*(.*)/\n\n\n== $1 ==/gm;
+  $cur_text =~ s/\n*---\+\+\++\!*\s*(.*)/\n\n==== $1 ====/gm;
+  $cur_text =~ s/\n*---\+\+\++\!*\s*(.*)/\n\n=== $1 ===/gm;
+  $cur_text =~ s/\n*---\+\+\!*\s*(.*)/\n\n\n== $1 ==/gm;
   # MediaWiki style generally does not use H1 tags, just bold it. 
-  $cur_text =~ s/\n*---\+\s*(.*)/\n\'\'\'$1\'\'\'/gm;
+  $cur_text =~ s/\n*---\+\!*\s*(.*)/\n\'\'\'$1\'\'\'/gm;
 
   # Convert tabbed lists to "*"-lists
   $cur_text =~ s/^\t\*/\*/gm;
