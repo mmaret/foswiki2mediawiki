@@ -29,7 +29,8 @@
 #
 #
 
-use strict; 
+use utf8;
+use strict;
 use Getopt::Std;
 
 # temp
@@ -87,6 +88,7 @@ sub main {
   }
 
   my $output = convert_from_foswiki($input);
+  utf8::encode($output);
   print $output;
   print "\n";
   
